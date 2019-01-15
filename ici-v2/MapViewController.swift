@@ -11,7 +11,9 @@ import MapKit
 
 class MapViewController: UIViewController , MAMapViewDelegate{
     
-    class MAPoiAnnotation: MAPointAnnotation{ //poi图标类（为了和自己的位置图标区分）
+    class MAContentAnnotation: MAPointAnnotation{ //热门内容图标类（为了和自己的位置图标区分）
+    }
+    class MATopicAnnotation: MAPointAnnotation{ //热门话题图标类（为了和自己的位置图标区分）
     }
     var topicPopupView: UIView! //热门话题弹窗视图
     var topicImageView: UIImageView! //热门话题图标
@@ -24,7 +26,8 @@ class MapViewController: UIViewController , MAMapViewDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         /* 热门话题弹窗视图 */
-        topicPopupView = UIView(frame:CGRect(x:self.view.frame.width/2-335.px(),y:self.view.frame.height-338.px(),width:670.px(),height:150.px()))
+      //  topicPopupView = UIView(frame:CGRect(x:self.view.frame.width/2-335.px(),y:self.view.frame.height-338.px(),width:670.px(),height:150.px()))
+        topicPopupView = UIView(frame:CGRect(x:0,y:0,width:670.px(),height:150.px()))
         topicPopupView.backgroundColor = UIColor(patternImage: UIImage(named: "topicPopup")!)
         
         /* 热门话题图标 */
@@ -71,7 +74,8 @@ class MapViewController: UIViewController , MAMapViewDelegate{
         
         let mapView = MAMapView(frame: self.view.bounds)
         var path = Bundle.main.bundlePath
-        let pointAnnotation = MAPoiAnnotation()
+        let contentAnnotation = MAContentAnnotation()
+        let topicAnnotation = MATopicAnnotation()
         path.append("/style.data")
         let jsonData = NSData.init(contentsOfFile: path)
         mapView.setCustomMapStyleWithWebData(jsonData as Data!)
@@ -98,36 +102,68 @@ class MapViewController: UIViewController , MAMapViewDelegate{
         
         mapView.setZoomLevel(17.5, animated: true)
         
-        pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: 30.529167, longitude: 114.355833)
-        mapView.addAnnotation(pointAnnotation)
+        contentAnnotation.coordinate = CLLocationCoordinate2D(latitude: 30.529167, longitude: 114.355833)
+        mapView.addAnnotation(contentAnnotation)
+        
+        topicAnnotation.coordinate = CLLocationCoordinate2D(latitude: 30.53993, longitude: 114.363939)
+        mapView.addAnnotation(topicAnnotation)
         
         self.view.addSubview(mapView)
-        self.view.addSubview(topicPopupView)
+      //  self.view.addSubview(topicPopupView)
         // Do any additional setup after loading the view, typically from a nib.
     }
-    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+    }
 }
 
 extension MapViewController {
     func mapView(_ mapView: MAMapView!, viewFor annotation: MAAnnotation!) -> MAAnnotationView! {
         
-        if (annotation is MAPoiAnnotation) {  //判断是否为poi点
-            let pointReuseIndetifier = "item"
+        if (annotation is MAContentAnnotation) {  //判断是否为热门内容点
+            let pointReuseIndetifier = "contentMarker"
             var annotationView: MAAnnotationView? = mapView.dequeueReusableAnnotationView(withIdentifier: pointReuseIndetifier)
             
             if annotationView == nil {
                 annotationView = MAAnnotationView(annotation: annotation, reuseIdentifier: pointReuseIndetifier)
             }
             annotationView!.annotation = annotation
-            annotationView!.image = UIImage(named: "message")
+            annotationView!.image = UIImage(named: "contentMarker")
+            annotationView!.frame = CGRect(x:0,y:0,width:88.px(),height:88.px())
             //设置中心点偏移，使得标注底部中间点成为经纬度对应点
-            annotationView!.centerOffset = CGPoint(x:0, y:-18);
+            annotationView!.centerOffset = CGPoint(x:0, y:-44.px());
+            return annotationView!
+        }
+        else if (annotation is MATopicAnnotation) {  //判断是否为热门话题点
+            let pointReuseIndetifier = "topicMarker"
+            var annotationView: MAAnnotationView? = mapView.dequeueReusableAnnotationView(withIdentifier: pointReuseIndetifier)
+            
+            if annotationView == nil {
+                annotationView = MAAnnotationView(annotation: annotation, reuseIdentifier: pointReuseIndetifier)
+            }
+            annotationView!.annotation = annotation
+            
+            annotationView!.image = UIImage(named: "topicMarker")
+            annotationView!.frame = CGRect(x:0,y:0,width:88.px(),height:88.px())
+            //设置中心点偏移，使得标注底部中间点成为经纬度对应点
+            annotationView!.centerOffset = CGPoint(x:0, y:-44.px());
+            let customView = MACustomCalloutView(frame:CGRect(x:0,y:0,width:670.px(),height:150.px()))
+            customView.addSubview(topicPopupView)
+            //设置弹窗和图标的相对位置，默认在正上方
+            //annotationView!.calloutOffset = CGPoint(x:0,y:150.px())
+            annotationView!.customCalloutView = customView
+            annotationView!.canShowCallout = true
             
             return annotationView!
         }
         
         return nil
     }
+   
+    
+
+    
 }
 
 
