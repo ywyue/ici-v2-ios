@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        AMapServices.shared()?.apiKey = "167bf6a12d7be8225374fa31b7088329"
+        AMapServices.shared()?.apiKey = "725cc1b39aa9fdc995d11e2b2047cd7a"
         
         window = UIWindow.init(frame: UIScreen.main.bounds)
         window?.backgroundColor = UIColor.white
