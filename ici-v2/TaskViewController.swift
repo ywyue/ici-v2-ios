@@ -52,8 +52,8 @@ class TaskViewController: UIViewController {
         scoreBackgroundImageView.addSubview(questionImageView)
         
         /* 积分图标 */
-        scoreImageView = UIImageView(image: UIImage(named: "score"))
-        scoreImageView.frame = CGRect(x:146.px(),y:68.px(),width:110.px(),height:110.px())
+        scoreImageView = UIImageView(image: UIImage(named: "scoreBig"))
+        scoreImageView.frame = CGRect(x:146.px(),y:68.px(),width:106.px(),height:106.px())
         scoreBackgroundImageView.addSubview(scoreImageView)
         
         /* 我的积分 */
