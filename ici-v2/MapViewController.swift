@@ -240,7 +240,7 @@ extension MapViewController {
             
             return annotationView!
         }
-        else if (annotation is MAModelAnnotation) {  //判断是否为热门话题点
+        else if (annotation is MAModelAnnotation) {  //判断是否为模型点
             let pointReuseIndetifier = "modelMarker"
             var annotationView: MAAnnotationView? = mapView.dequeueReusableAnnotationView(withIdentifier: pointReuseIndetifier)
             

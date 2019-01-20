@@ -8,26 +8,30 @@
 
 import UIKit
 
-class MessageViewController: UIViewController {
-    var topView: UIView! //标题部分背景
-    var messageLabel: UILabel! //消息标题
+class MessageViewController: UIViewController,UITableViewDataSource,UITableViewDelegate {
+    
+    
+    var messageTitleLabel: UILabel! //消息标题
     override func viewDidLoad() {
         super.viewDidLoad()
-        /* 标题部分背景 */
-        topView = UIView(frame:CGRect(x:0,y:0,width:self.view.frame.width,height:125.px()))
-        topView.backgroundColor = UIColor.white
-        setShadow(view: topView, sColor: UIColor.gray, offset: CGSize.init(width:0.0,height:3), opacity: 0.2, radius: 5)
-        self.view.addSubview(topView)
         
         /* 消息标题 */
-        messageLabel = UILabel()
-        messageLabel.frame = CGRect(x:(self.view.frame.width)/2-37.5.px(),y:topView.center.y+10.px(),width:75.px(),height:30.px())
-        messageLabel.textAlignment = .center
-        messageLabel.font = UIFont.boldSystemFont(ofSize:30.px())
-        messageLabel.text = "消息"
-        messageLabel.textColor = UIColor.black
-        self.view.addSubview(messageLabel)
+        messageTitleLabel = UILabel()
+        messageTitleLabel.frame = CGRect(x:52.px(),y:98.px(),width:120.px(),height:54.px())
+        messageTitleLabel.textAlignment = .left
+        messageTitleLabel.font = UIFont.boldSystemFont(ofSize:54.px())
+        messageTitleLabel.text = "消息"
+        messageTitleLabel.textColor = UIColor.black
+        self.view.addSubview(messageTitleLabel)
         
+        let screenRect = UIScreen.main.bounds
+        let tabelRect = CGRect(x:0.px(),y:234.px(),width:screenRect.size.width,height:screenRect.size.height-234.px())
+        let tabelView = UITableView(frame: tabelRect)
+        
+        tabelView.dataSource = self
+        tabelView.delegate = self
+        
+        self.view.addSubview(tabelView)
         /*
         let frame = CGRect(x: 0, y: 125.px(), width: self.view.frame.width,height: 125.px())
         let cgView = CGView(frame: frame)
@@ -35,20 +39,49 @@ class MessageViewController: UIViewController {
         self.view.addSubview(cgView)*/
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 147.px()
+    }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 3
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let identifier = "messageCell"
+        var cell:CustomizeUITableViewCell? = tableView.dequeueReusableCell(withIdentifier: identifier) as? CustomizeUITableViewCell
+        
+        if(cell == nil)
+        {
+            cell = CustomizeUITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: identifier)
+        }
+        if(indexPath as NSIndexPath).row == 1
+        {
+            cell?.cellImage?.image = UIImage(named: "comment")
+            cell?.title?.text = "评论"
+        }
+        if(indexPath as NSIndexPath).row == 2
+        {
+            cell?.cellImage?.image = UIImage(named: "iciOfficial")
+            cell?.title?.text = "ici官方"
+            cell?.title?.frame = CGRect(x:167.px(),y:45.px(),width:100.px(),height:25.px())
+            cell?.title?.font = UIFont.boldSystemFont(ofSize:25.px())
+            
+            cell?.arrowImage?.image = nil
+            cell?.detail?.text = "这次的活动是什么你知道吗？"
+            cell?.date?.text = "星期三"
+       
+            
+        }
+    
+        return cell!
+    }
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
 }
 
 
-func setShadow(view:UIView,sColor:UIColor,offset:CGSize,
-               opacity:Float,radius:CGFloat) {
-    //设置阴影颜色
-    view.layer.shadowColor = sColor.cgColor
-    //设置透明度
-    view.layer.shadowOpacity = opacity
-    //设置阴影半径
-    view.layer.shadowRadius = radius
-    //设置阴影偏移量
-    view.layer.shadowOffset = offset
-}
 
 /* 画直线 */
 class CGView:UIView {
@@ -93,4 +126,54 @@ class CGView:UIView {
         context.strokePath()
     }
     
+}
+
+
+
+class CustomizeUITableViewCell:UITableViewCell{
+    var cellImage:UIImageView!
+    var title:UILabel!
+    var detail:UILabel!
+    var arrowImage:UIImageView!
+    var date:UILabel!
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        self.cellImage = UIImageView(image: UIImage(named: "praise"))
+        self.cellImage.frame = CGRect(x:50.px(),y:30.px(),width:90.px(),height:90.px())
+        
+        self.title = UILabel()
+        self.title.frame = CGRect(x:167.px(),y:self.cellImage.center.y-12.5.px(),width:60.px(),height:25.px())
+        self.title.textAlignment = .left
+        self.title.font = UIFont.systemFont(ofSize:25.px())
+        self.title.text = "点赞"
+        self.title.textColor = UIColor.black
+        
+        self.arrowImage = UIImageView(image: UIImage(named: "arrow"))
+        self.arrowImage.frame = CGRect(x:660.px(),y:self.cellImage.center.y-18.5.px(),width:25.px(),height:37.px())
+        
+        self.detail = UILabel()
+        self.detail.frame = CGRect(x:167.px(),y:85.px(),width:400.px(),height:20.px())
+        self.detail.textAlignment = .left
+        self.detail.font = UIFont.systemFont(ofSize:20.px())
+        self.detail.textColor = UIColor.gray
+        
+        self.date = UILabel()
+        self.date = UILabel()
+        self.date.frame = CGRect(x:605.px(),y:45.px(),width:100.px(),height:22.px())
+        self.date.textAlignment = .left
+        self.date.font = UIFont.systemFont(ofSize:22.px())
+        self.date.textColor = UIColor.gray
+        
+        self.addSubview(self.cellImage)
+        self.addSubview(self.title)
+        self.addSubview(self.arrowImage)
+        self.addSubview(self.detail)
+        self.addSubview(self.date)
+        
+        
+    }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(code:)has not brrn implomented")
+    }
 }
