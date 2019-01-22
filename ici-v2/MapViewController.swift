@@ -35,10 +35,11 @@ class MapViewController: UIViewController , MAMapViewDelegate, AMapSearchDelegat
     
     var contentPopupView: UIView! //热门内容弹窗视图
     
-    
+    let RoutePlanningPaddingEdge = CGFloat(20)
     var mapView: MAMapView!         //地图
     var search: AMapSearchAPI!      // 地图内的搜索API类
     var route: AMapRoute!           //路径规划信息
+    var naviRoute: MANaviRoute?     //用于显示当前路线方案
     
     var startAnnotation: MAPointAnnotation!
     var destinationAnnotation: MAPointAnnotation!
@@ -53,7 +54,7 @@ class MapViewController: UIViewController , MAMapViewDelegate, AMapSearchDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+        /*
         
         /* 热门话题弹窗视图 */
         topicPopupView = UIView(frame:CGRect(x:0,y:0,width:670.px(),height:150.px()))
@@ -97,7 +98,7 @@ class MapViewController: UIViewController , MAMapViewDelegate, AMapSearchDelegat
         topicPopupView.addSubview(watchImageView)
         
         
-        
+        */
         
 //        self.title = "地图"
 //        self.tabBarItem.image = UIImage(named: "MapIcon")?.withRenderingMode(.alwaysOriginal)
@@ -106,6 +107,10 @@ class MapViewController: UIViewController , MAMapViewDelegate, AMapSearchDelegat
         initMapViewAndSearch()
         initMapTitleAndScore()
         addModelAnnotations()
+        setUpData()
+        resetSearchResultAndXibViewsToDefault()
+        addDefaultAnnotations()
+        searchRoutePlanningWalk()
         
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -187,6 +192,91 @@ class MapViewController: UIViewController , MAMapViewDelegate, AMapSearchDelegat
         let modelAnnotation = MAModelAnnotation()
         modelAnnotation.coordinate = CLLocationCoordinate2D(latitude: 30.53993, longitude: 114.363939)
         mapView.addAnnotation(modelAnnotation)
+    }
+    
+    //初始化坐标数据
+    func setUpData() {
+        self.startCoordinate = CLLocationCoordinate2DMake(30.541646, 114.362248)
+        self.destinationCoordinate = CLLocationCoordinate2DMake(30.53993, 114.363939)
+    }
+    
+    //初始化或者规划失败后，设置view和数据为默认值
+    func resetSearchResultAndXibViewsToDefault() {
+        self.totalRouteNums = 0
+        self.currentRouteIndex = 0
+        
+        
+    }
+    //在地图上添加起始和终点的标注点
+    func addDefaultAnnotations() {
+        
+        let startAnnotation = MAPointAnnotation()
+        startAnnotation.coordinate = self.startCoordinate
+        self.startAnnotation = startAnnotation
+        
+        let destinationAnnotation = MAPointAnnotation()
+        destinationAnnotation.coordinate = self.destinationCoordinate
+        self.destinationAnnotation = destinationAnnotation
+        
+        self.mapView.addAnnotation(startAnnotation)
+        self.mapView.addAnnotation(destinationAnnotation)
+    }
+    
+    //步行路线开始规划
+    func searchRoutePlanningWalk() {
+        let navi = AMapWalkingRouteSearchRequest()
+        navi.multipath = 1; ///提供备选方案
+        
+        /* 出发点. */
+        navi.origin = AMapGeoPoint.location(withLatitude: CGFloat(self.startCoordinate.latitude), longitude: CGFloat(self.startCoordinate.longitude))
+        
+        /* 目的地. */
+        navi.destination = AMapGeoPoint.location(withLatitude: CGFloat(self.destinationCoordinate.latitude), longitude: CGFloat(self.destinationCoordinate.longitude))
+        
+        self.search.aMapWalkingRouteSearch(navi)
+    }
+    
+    //在地图上显示当前选择的路径
+    func presentCurrentRouteCourse() {
+        if self.totalRouteNums <= 0 {
+            return
+        }
+        self.naviRoute?.removeFromMapView() //清空地图上已有的路线
+        
+        let type = MANaviAnnotationType.walking //步行类型
+        
+        let startPoint = AMapGeoPoint.location(withLatitude: CGFloat(self.startAnnotation.coordinate.latitude), longitude: CGFloat(self.startAnnotation.coordinate.longitude)) //起点
+        
+        let endPoint = AMapGeoPoint.location(withLatitude: CGFloat(self.destinationAnnotation.coordinate.latitude), longitude: CGFloat(self.destinationAnnotation.coordinate.longitude))  //终点
+        
+        //根据已经规划的路径，起点，终点，规划类型，是否显示实时路况，生成显示方案
+        self.naviRoute = MANaviRoute(for: self.route.paths[self.currentRouteIndex], withNaviType: type, showTraffic: false, start: startPoint, end: endPoint)
+        self.naviRoute?.add(to: self.mapView)
+        
+        //显示到地图上
+        let edgePaddingRect = UIEdgeInsets(top: RoutePlanningPaddingEdge, left: RoutePlanningPaddingEdge, bottom: RoutePlanningPaddingEdge, right: RoutePlanningPaddingEdge)
+        //缩放地图使其适应polylines的展示
+        self.mapView.setVisibleMapRect(CommonUtility.mapRect(forOverlays: self.naviRoute?.routePolylines), edgePadding: edgePaddingRect, animated: true)
+    }
+    
+    // MARK: - AMapSearchDelegate
+    
+    //当路径规划搜索请求发生错误时，会调用代理的此方法
+    func aMapSearchRequest(_ request: Any, didFailWithError error: Error?) {
+        print("Error: \(error)")
+        self.resetSearchResultAndXibViewsToDefault()
+    }
+    
+    //路径规划搜索完成回调.
+    func onRouteSearchDone(_ request: AMapRouteSearchBaseRequest, response: AMapRouteSearchResponse) {
+        if response.route == nil {
+            self.resetSearchResultAndXibViewsToDefault()
+            return
+        }
+        self.route = response.route
+        self.totalRouteNums = self.route.paths.count
+        self.currentRouteIndex = 0
+        self.presentCurrentRouteCourse()
     }
     
     @objc func exploreBtnViewClicked(){

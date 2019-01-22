@@ -27,7 +27,6 @@ class MessageViewController: UIViewController,UITableViewDataSource,UITableViewD
         let screenRect = UIScreen.main.bounds
         let tabelRect = CGRect(x:0.px(),y:234.px(),width:screenRect.size.width,height:screenRect.size.height-234.px())
         let tabelView = UITableView(frame: tabelRect)
-        
         tabelView.dataSource = self
         tabelView.delegate = self
         
@@ -39,13 +38,17 @@ class MessageViewController: UIViewController,UITableViewDataSource,UITableViewD
         self.view.addSubview(cgView)*/
     }
     
+    //设置每一个消息栏的高度
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 147.px()
     }
+    
+    //设置消息栏数目
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 3
     }
     
+    //定义每个消息栏的具体内容
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let identifier = "messageCell"
         var cell:CustomizeUITableViewCell? = tableView.dequeueReusableCell(withIdentifier: identifier) as? CustomizeUITableViewCell
@@ -129,7 +132,7 @@ class CGView:UIView {
 }
 
 
-
+//自定义消息栏视图
 class CustomizeUITableViewCell:UITableViewCell{
     var cellImage:UIImageView!
     var title:UILabel!
